@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+
+<launch>
+  <!-- <arg name="model" default="hummingbird" /> -->
+  <arg name="model" default="pelican" />
+
+  <param name="xacro" command="$(find xacro)/xacro.py
+    '$(find cpr_asctec_gazebo)/worlds/empty.world.xacro' -o 'empty.world'
+    --inorder
+    real_time_update_rate:='100.0'
+    " />
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <!-- <arg name="world_name" value="$(find asctec_quadrotor_gazebo)/worlds/100Hz.world"/> -->
+    <arg name="world_name" value="$(find cpr_asctec_gazebo)/worlds/empty.world"/>
+  </include>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find cpr_asctec_viz)/rviz/three_uavs.rviz" />
+
+  <node pkg="quadrotor_path_follower" type="path_follower" name="path_follower" output="screen">
+    <rosparam file="$(find cpr_quadrotor_waypoint_demo)/config/hex_pattern.yaml" />
+  </node>
+
+  <include file="$(find cpr_asctec_gazebo)/launch/spawn_quadrotor.launch">
+    <arg name="robot_name" value="uav3"/>
+    <arg name="model" value="$(arg model)" />
+    <arg name="material" value="Red" />
+    <arg name="x" value="1.0" />
+    <arg name="y" value="0.0" />
+  </include>
+
+  <include file="$(find cpr_asctec_gazebo)/launch/spawn_quadrotor.launch">
+    <arg name="robot_name" value="uav4"/>
+    <arg name="model" value="$(arg model)" />
+    <arg name="material" value="Purple" />
+    <arg name="x" value="-0.5" />
+    <arg name="y" value="-0.866" />
+  </include>
+
+  <include file="$(find cpr_asctec_gazebo)/launch/spawn_quadrotor.launch">
+    <arg name="robot_name" value="uav5"/>
+    <arg name="model" value="$(arg model)" />
+    <arg name="material" value="Green" />
+    <arg name="x" value="-0.5" />
+    <arg name="y" value="0.866" />
+  </include>
+
+</launch>

@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<robot name="quadrotor_gazebo" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:arg name="base_link_frame" default="base_link" />
+  <xacro:arg name="world_frame" default="world" />
+
+  <gazebo>
+    <plugin name="quadrotor_controller" filename="libgazebo_ros_control.so">
+      <controlPeriod>0.01</controlPeriod>
+      <robotSimType>hector_quadrotor_controller_gazebo/QuadrotorHardwareSim</robotSimType>
+    </plugin>
+
+    <plugin name="quadrotor_aerodynamics" filename="libhector_gazebo_quadrotor_aerodynamics.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>0.0</updateRate>
+      <bodyName>base_link</bodyName>
+      <frameId>$(arg base_link_frame)</frameId>
+    </plugin>
+
+    <plugin name="quadrotor_imu_sim" filename="libhector_gazebo_ros_imu.so">
+      <updateRate>100.0</updateRate>
+      <bodyName>base_link</bodyName>
+      <frameId>$(arg base_link_frame)</frameId>
+      <topicName>raw_imu</topicName>
+      <accelDrift>0.5 0.5 0.5</accelDrift>
+      <accelGaussianNoise>0.35 0.35 0.3</accelGaussianNoise>
+      <rateDrift>0.1 0.1 0.1</rateDrift>
+      <rateGaussianNoise>0.05 0.05 0.015</rateGaussianNoise>
+    </plugin>
+
+    <plugin name="quadrotor_groundtruth_sim" filename="libgazebo_ros_p3d.so">
+      <updateRate>100.0</updateRate>
+      <bodyName>base_link</bodyName>
+      <topicName>ground_truth/state</topicName>
+      <gaussianNoise>0.0</gaussianNoise>
+      <frameName>$(arg world_frame)</frameName>
+    </plugin>
+
+  </gazebo>
+
+</robot>

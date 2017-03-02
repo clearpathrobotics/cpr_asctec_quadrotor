@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>cpr_asctec_description</name>
+  <version>0.0.0</version>
+  <description>TODO</description>
+
+  <author email="paul@bovbel.com">Paul Bovbel</author>
+
+  <maintainer email="paul@bovbel.com">Paul Bovbel</maintainer>
+  <maintainer email="tbaltovski@clearpath.ai">Tony Baltovski</maintainer>
+
+  <url type="website">http://ros.org/wiki/cpr_asctec_description</url>
+  <url type="bugtracker">https://github.com/clearpathrobotics/cpr_asctec_quadrotor/issues</url>
+  <url type="repository">https://github.com/clearpathrobotics/cpr_asctec_quadrotor</url>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>urdf</exec_depend>
+  <exec_depend>xacro</exec_depend>
+
+  <test_depend>roslaunch</test_depend>
+
+</package>

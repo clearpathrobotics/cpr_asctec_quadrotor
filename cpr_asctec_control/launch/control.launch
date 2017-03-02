@@ -1,0 +1,55 @@
+<launch>
+
+  <arg name="robot_name"/>
+  <arg name="state_topic"/>
+  <arg name="material" default="Grey" />
+  <arg name="controllers" default="
+    controller/attitude
+    controller/velocity
+    controller/position"/>
+  <arg name="model"/>
+  <arg name="model_suffix" default=""/>
+
+  <arg name="local" default="true" />
+  <arg name="remote" default="true" />
+
+  <rosparam ns="controller" file="$(find cpr_asctec_control)/config/$(arg model)$(arg model_suffix)_controller.yaml" />
+  <rosparam ns="limits" file="$(find cpr_asctec_control)/config/$(arg model)_limits.yaml" />
+  <rosparam file="$(find cpr_asctec_control)/config/$(arg model)_params.yaml" />
+
+  <rosparam subst_value="true">
+    base_link_frame: $(arg robot_name)/base_link
+    base_stabilized_frame: $(arg robot_name)/base_stabilized
+    base_footprint_frame: $(arg robot_name)/base_footprint
+    world_frame: world
+  </rosparam>
+
+  <node name="state_to_tf" pkg="message_to_tf" type="message_to_tf">
+    <param name="topic" value="$(arg state_topic)" />
+    <param name="frame_id" value="world"/>
+    <param name="footprint_frame_id" value="$(arg robot_name)/base_footprint"/>
+    <param name="stabilized_frame_id" value="$(arg robot_name)/base_stabilized"/>
+    <param name="child_frame_id" value="$(arg robot_name)/base_link"/>
+  </node>
+
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" output="screen" if="$(arg local)" args="
+    $(arg controllers)
+    --shutdown-timeout 1" />
+
+  <node name="pose_action" pkg="hector_quadrotor_actions" type="pose_action" output="screen" if="$(arg remote)">
+    <remap from="pose" to="state_to_tf/pose" />
+  </node>
+
+  <node name="landing_action" pkg="hector_quadrotor_actions" type="landing_action" output="screen" if="$(arg remote)">
+    <remap from="pose" to="state_to_tf/pose" />
+  </node>
+
+  <node name="takeoff_action" pkg="hector_quadrotor_actions" type="takeoff_action" output="screen" if="$(arg remote)">
+    <remap from="pose" to="state_to_tf/pose" />
+  </node>
+
+  <node name="estop_relay" pkg="topic_tools" type="relay" args="/estop estop" if="$(arg remote)">
+    <param name="lazy" value="true" />
+  </node>
+
+</launch>

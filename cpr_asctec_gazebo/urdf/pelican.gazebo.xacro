@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<robot name="pelican_gazebo" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find cpr_asctec_description)/urdf/pelican.urdf.xacro" />
+  <xacro:include filename="$(find cpr_asctec_gazebo)/urdf/plugins.gazebo.xacro" />
+
+</robot>

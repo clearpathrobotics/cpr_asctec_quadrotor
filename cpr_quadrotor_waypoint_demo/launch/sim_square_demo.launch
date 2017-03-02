@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <!-- <arg name="world_name" value="$(find asctec_quadrotor_gazebo)/worlds/1kHz.world"/> -->
+    <arg name="world_name" value="$(find cpr_asctec_gazebo)/worlds/100Hz.world"/>
+  </include>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find cpr_asctec_viz)/rviz/four_uavs.rviz" />
+
+  <node pkg="quadrotor_path_follower" type="path_follower" name="path_follower" output="screen">
+    <rosparam file="$(find quadrotor_path_follower)/config/square_pattern.yaml" />
+  </node>
+
+  <include file="$(find cpr_asctec_gazebo)/launch/spawn_quadrotor.launch">
+    <arg name="robot_name" value="uav1"/>
+    <arg name="model" value="hummingbird" />
+    <arg name="material" value="Green" />
+    <arg name="x" value="1.0" />
+    <arg name="y" value="2.0" />
+  </include>
+
+  <include file="$(find cpr_asctec_gazebo)/launch/spawn_quadrotor.launch">
+    <arg name="robot_name" value="uav6"/>
+    <arg name="model" value="hummingbird" />
+    <arg name="material" value="Blue" />
+    <arg name="x" value="1.0" />
+    <arg name="y" value="-2.0" />
+  </include>
+
+  <include file="$(find cpr_asctec_gazebo)/launch/spawn_quadrotor.launch">
+    <arg name="robot_name" value="uav8"/>
+    <arg name="model" value="hummingbird" />
+    <arg name="material" value="Red" />
+    <arg name="x" value="-1.0" />
+    <arg name="y" value="2.0" />
+  </include>
+
+  <include file="$(find cpr_asctec_gazebo)/launch/spawn_quadrotor.launch">
+    <arg name="robot_name" value="uav10"/>
+    <arg name="model" value="hummingbird" />
+    <arg name="material" value="White" />
+    <arg name="x" value="-1.0" />
+    <arg name="y" value="-2.0" />
+  </include>
+
+
+</launch>

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find cpr_asctec_gazebo)/worlds/100Hz.world"/>
+  </include>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find cpr_asctec_viz)/rviz/teleop.rviz" />
+
+  <include file="$(find cpr_asctec_control)/launch/teleop.launch" >
+    <arg name="robot_name" value="uav1"/>
+    <arg name="control_mode" value="position"/>
+    <!-- <arg name="control_mode" value="velocity"/> -->
+  </include>
+
+  <include file="$(find cpr_asctec_gazebo)/launch/spawn_quadrotor.launch">
+    <arg name="robot_name" value="uav1"/>
+    <arg name="model" value="hummingbird" />
+    <arg name="material" value="Blue" />
+    <arg name="controllers" value="
+      controller/attitude
+      controller/velocity
+      controller/position
+      "/>
+  </include>
+
+</launch>

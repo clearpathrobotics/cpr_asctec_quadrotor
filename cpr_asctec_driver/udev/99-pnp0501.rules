@@ -1,0 +1,1 @@
+KERNEL=="ttyS[0-9]*", SUBSYSTEMS=="pnp", DRIVERS=="serial", ATTRS{id}=="PNP0501", MODE="0666"

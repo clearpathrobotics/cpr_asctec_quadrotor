@@ -1,0 +1,17 @@
+connection_timeout: 10.0
+action_timeout: 30.0
+state_timeout: 0.5
+command_timeout: 0.1
+
+dist_tolerance: 0.1
+yaw_tolerance: 0.35
+time_in_tolerance: 1.0
+
+landing_height: 0.1
+takeoff_height: 0.1
+
+estop_deceleration: 1.0
+
+rollpitch_scale: 3000.0
+yaw_scale: 400.0
+thrust_scale: 780.0

@@ -1,0 +1,50 @@
+<launch>
+
+  <arg name="robot_name"/>
+
+  <arg name="model" default="hummingbird" />
+  <arg name="material" default="Grey" />
+  <arg name="controllers" default="
+    controller/attitude
+    controller/velocity
+    controller/position"/>
+  <arg name="x" default="0.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="0.0"/>
+
+
+  <group ns="$(arg robot_name)">
+
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find cpr_asctec_gazebo)/urdf/$(arg model).gazebo.xacro'
+      material:=$(arg material)
+      base_link_frame:=$(arg robot_name)/base_link
+      world_frame:=world
+      "/>
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" >
+      <param name="tf_prefix" value="$(arg robot_name)"/>
+    </node>
+
+    <include file="$(find cpr_asctec_control)/launch/control.launch">
+      <arg name="robot_name" value="$(arg robot_name)"/>
+      <arg name="controllers" value="$(arg controllers)"/>
+      <arg name="model" value="$(arg model)"/>
+
+      <arg name="model_suffix" value="_sim"/>
+      <arg name="state_topic" value="ground_truth/state"/>
+    </include>
+
+    <rosparam command="load" file="$(find hector_quadrotor_model)/param/quadrotor_aerodynamics.yaml" />
+
+    <!-- Spawn robot in gazebo -->
+    <node name="spawn_quadrotor_node" pkg="gazebo_ros" type="spawn_model" args="
+      -urdf
+      -param robot_description
+      -model $(arg robot_name)
+      -x $(arg x)
+      -y $(arg y)
+      -z $(arg z)
+      "/>
+  </group>
+
+</launch>

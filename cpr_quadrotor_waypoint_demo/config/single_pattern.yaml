@@ -1,0 +1,14 @@
+path:
+- {x:  0.0, y: 0.0, z:  0.0, roll:  0.0, pitch:  0.0, yaw:  1.508}
+- {x:  1.0, y:  1.0, z:  0.0, roll:  0.0, pitch:  0.0, yaw:  0.0}
+- {x: -1.0, y:  1.0, z:  0.0, roll:  0.0, pitch:  0.0, yaw:  3.14}
+- {x: -1.0, y: -1.0, z:  0.0, roll:  0.0, pitch:  0.0, yaw:  -1.508}
+- {x: 1.0, y: -1.0, z:  0.0, roll:  0.0, pitch:  0.0, yaw:  -1.508}
+
+
+clients:
+- {name: uav1, pose: 0 }
+
+scale: 1
+base_height: 0.5
+repeat: 1

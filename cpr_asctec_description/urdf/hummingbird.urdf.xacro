@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<robot name="hummingbird" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find cpr_asctec_description)/urdf/materials.urdf" />
+
+  <property name="M_PI" value="3.14159"/>
+
+  <xacro:arg name="material" default="Grey"/>
+
+  <link name="base_link">
+    <visual>
+      <origin xyz="0.0365 0.0 0.0223" rpy="${-M_PI/2} 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://cpr_asctec_description/meshes/hummingbird.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="$(arg material)"/>
+    </visual>
+    <collision>
+      <origin xyz="0.0365 0.0 0.0223" rpy="${-M_PI/2} 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://cpr_asctec_description/meshes/hummingbird.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.53057" />
+      <inertia  ixx="0.00367556974" ixy="0.0" ixz="0.0"
+                iyy="0.00365031574" iyz="0.0"
+                izz="0.00703095144" />
+    </inertial>
+  </link>
+
+  <gazebo reference="base_link">
+    <material>Gazebo/$(arg material)</material>
+  </gazebo>
+
+  <xacro:macro name="hummingbird_prop" params="name *origin">
+
+    <link name="prop_${name}_link">
+      <visual>
+        <geometry>
+          <cylinder radius="0.1" length="0.016"/>
+        </geometry>
+        <material name="GreyTransparent"/>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="0.1" length="0.016"/>
+        </geometry>
+      </collision>
+    </link>
+    <joint name="prop_${name}_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="prop_${name}_link"/>
+      <xacro:insert_block name="origin"/>
+    </joint>
+
+    <gazebo reference="prop_${name}_link">
+      <material>Gazebo/GreyTransparent</material>
+    </gazebo>
+
+  </xacro:macro>
+
+  <xacro:hummingbird_prop name="front">
+    <origin xyz="0.17 0.0 0.024" rpy="0.0 0.0 0.0"/>
+  </xacro:hummingbird_prop>
+
+  <xacro:hummingbird_prop name="back">
+    <origin xyz="-0.17 0.0 0.024" rpy="0.0 0.0 0.0"/>
+  </xacro:hummingbird_prop>
+
+  <xacro:hummingbird_prop name="left">
+    <origin xyz="0.0 0.17 0.024" rpy="0.0 0.0 0.0"/>
+  </xacro:hummingbird_prop>
+
+  <xacro:hummingbird_prop name="right">
+    <origin xyz="0.0 -0.17 0.024" rpy="0.0 0.0 0.0"/>
+  </xacro:hummingbird_prop>
+
+</robot>
