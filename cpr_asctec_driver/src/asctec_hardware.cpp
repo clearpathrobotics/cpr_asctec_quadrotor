@@ -1,9 +1,12 @@
 #include "cpr_asctec_driver/asctec_hardware.h"
 #include "cpr_asctec_driver/asctec_serial.h"
 
+#include "tf2/LinearMath/Quaternion.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include "hector_quadrotor_interface/helpers.h"
 #include <ros/ros.h>
 
+#include <cstdint>
 
 namespace cpr_asctec_driver
 {
@@ -37,6 +40,9 @@ namespace cpr_asctec_driver
     nh.param<double>("thrust_scale", thrust_scale_, 780.0);
 
     motor_status_pub_ = nh.advertise<hector_uav_msgs::MotorStatus>("motor_status", 1);
+    imu_pub_ = nh.advertise<sensor_msgs::Imu>("imu/data", 1);
+    mag_pub_ = nh.advertise<sensor_msgs::MagneticField>("imu/mag", 1);
+    gps_fix_pub_ = nh.advertise<sensor_msgs::NavSatFix>("fix", 1);
     motor_status_srv_ = nh.advertiseService("enable_motors", &AsctecHardware::enableMotorsCb, this);
 
     ros::NodeHandle limit_nh(nh, "limits");
@@ -71,11 +77,6 @@ namespace cpr_asctec_driver
     estop_sub_ = nh.subscribe("estop", 1, &AsctecHardware::estopCb, this);
   }
 
-  AsctecHardware::~AsctecHardware()
-  {
-
-  }
-
   bool AsctecHardware::enableMotorsCb(hector_uav_msgs::EnableMotors::Request &req, hector_uav_msgs::EnableMotors::Response &res)
   {
     // Enable motors service has exclusive lock on control
@@ -99,12 +100,11 @@ namespace cpr_asctec_driver
 
   void AsctecHardware::requestData()
   {
-
+    // TODO parametrize rate of individual components
     std::set<AsctecSerial::DataType> requests;
     requests.insert(AsctecSerial::STATUS);
-
-    // TODO parametrize IMU updating
-//    requests.insert(AsctecSerial::IMU_CALC);
+    requests.insert(AsctecSerial::IMU_CALC);
+    requests.insert(AsctecSerial::GPS);
 
     asctec_serial_->requestData(requests);
   }
@@ -121,8 +121,6 @@ namespace cpr_asctec_driver
     }else if(state_estop_){
       state_estop_ = false;
     }
-
-
 
     boost::mutex::scoped_lock control_lock(control_mutex_, boost::try_to_lock);
     if (control_lock) {
@@ -163,6 +161,7 @@ namespace cpr_asctec_driver
       short thrust = std::pow(thrust_command_.thrust, 0.5) * thrust_scale_; //collective: 0..4095 = 0..100%
       thrust = std::max(std::min(thrust, static_cast<short>(4095)), static_cast<short>(0));
 
+      // TODO(pbovbel) better formatting for a 'limited command debug' here
       ROS_DEBUG_STREAM("roll " << roll);
       ROS_DEBUG_STREAM("pitch  " << pitch);
       ROS_DEBUG_STREAM("yaw " << yaw);
@@ -179,22 +178,66 @@ namespace cpr_asctec_driver
 
     switch (data) {
       case AsctecSerial::NONE:
-        ROS_DEBUG("Timed out waiting for message from quad");
+      {
+        ROS_DEBUG("Timed out waiting for message from hardware.");
         break;
+      }
       case AsctecSerial::STATUS:
+      {
         motor_status_.header.stamp = time;
         motor_status_.on = asctec_serial_->status.motors_on;
         motor_status_.running = asctec_serial_->status.flying;
         motor_status_pub_.publish(motor_status_);
         break;
+      }
       case AsctecSerial::IMU_CALC:
-        //TODO update imu
+      {
+        imu_.header.stamp = time;
+        tf2::Quaternion q;
+        q.setRPY(
+          static_cast<float>(asctec_serial_->imu_calc.angle_roll)  * ASC_TO_ROS_ANGLE * -1.0,
+          static_cast<float>(asctec_serial_->imu_calc.angle_nick)  * ASC_TO_ROS_ANGLE *  1.0,
+          static_cast<float>(asctec_serial_->imu_calc.angle_yaw)   * ASC_TO_ROS_ANGLE * -1.0
+        );
+        imu_.orientation = tf2::toMsg(q);
+
+        imu_.angular_velocity.x = asctec_serial_->imu_calc.angvel_roll * ASC_TO_ROS_ANGVEL *  1.0;
+        imu_.angular_velocity.y = asctec_serial_->imu_calc.angvel_nick * ASC_TO_ROS_ANGVEL *  1.0;
+        imu_.angular_velocity.z = asctec_serial_->imu_calc.angvel_yaw  * ASC_TO_ROS_ANGVEL * -1.0;
+
+        imu_.linear_acceleration.x = asctec_serial_->imu_calc.acc_x_calib * ASC_TO_ROS_ACC * 1.0;
+        imu_.linear_acceleration.y = asctec_serial_->imu_calc.acc_y_calib * ASC_TO_ROS_ACC * -1.0;
+        imu_.linear_acceleration.z = asctec_serial_->imu_calc.acc_z_calib * ASC_TO_ROS_ACC * -1.0;
+        imu_pub_.publish(imu_);
+
+        mag_.header.stamp = time;
+        mag_.magnetic_field.x = asctec_serial_->imu_calc.Hx *  1.0;
+        mag_.magnetic_field.y = asctec_serial_->imu_calc.Hy *  1.0;
+        mag_.magnetic_field.z = asctec_serial_->imu_calc.Hz * -1.0;
+        mag_pub_.publish(mag_);
         break;
+      }
       case AsctecSerial::IMU_RAW:
+      {
+        // no-op, not implemented
         break;
+      }
+      case AsctecSerial::GPS:
+      {
+        gps_fix_.header.stamp = time;
+        gps_fix_.status.status = static_cast<uint8_t>(asctec_serial_->gps.status) == ASC_GPS_FIX ?
+          sensor_msgs::NavSatStatus::STATUS_FIX : sensor_msgs::NavSatStatus::STATUS_NO_FIX;
+        gps_fix_.latitude = asctec_serial_->gps.latitude * ASC_TO_ROS_LAT_LONG;
+        gps_fix_.longitude = asctec_serial_->gps.longitude * ASC_TO_ROS_LAT_LONG;
+        gps_fix_.altitude = asctec_serial_->gps.height * ASC_TO_ROS_HEIGHT;
+        gps_fix_pub_.publish(gps_fix_);
+        break;
+      }
       case AsctecSerial::UNKNOWN:
-        ROS_ERROR("Unknown message type");
+      {
+        ROS_ERROR_STREAM("Unknown message type " << data);
         break;
+      }
     }
 
   }

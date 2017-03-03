@@ -11,6 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   )
 find_package(Boost REQUIRED COMPONENTS chrono)
 
+set_directory_properties(PROPERTIES COMPILE_OPTIONS "-std=c++11;")
+
 include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 catkin_package(
@@ -25,12 +27,12 @@ add_library(cpr_asctec_hardware
   )
 target_link_libraries(cpr_asctec_hardware ${catkin_LIBRARIES})
 
-add_executable(cpr_asctec_driver
+add_executable(cpr_asctec_node
   src/asctec_node.cpp
   )
-target_link_libraries(cpr_asctec_driver cpr_asctec_hardware ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(cpr_asctec_node cpr_asctec_hardware ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-install(TARGETS cpr_asctec_driver cpr_asctec_hardware
+install(TARGETS cpr_asctec_node cpr_asctec_hardware
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

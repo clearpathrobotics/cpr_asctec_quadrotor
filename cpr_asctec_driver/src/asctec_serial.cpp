@@ -7,20 +7,26 @@
 namespace cpr_asctec_driver
 {
 
+  // TODO(pbovbel): Implement more packet types as necessary:
+  // http://wiki.asctec.de/display/AR/Communicating+with+the+Low+Level+Processor
+
   const boost::unordered_map<AsctecSerial::DataType, const uint16_t> AsctecSerial::packet_request = boost::assign::map_list_of
       (STATUS, 0x0001)
       (IMU_RAW, 0x0002)
-      (IMU_CALC, 0x0004);
+      (IMU_CALC, 0x0004)
+      (GPS, 0x0080);
 
   const boost::unordered_map<AsctecSerial::DataType, const uint8_t> AsctecSerial::packet_desc = boost::assign::map_list_of
       (IMU_RAW, 0x01)
       (STATUS, 0x02)
-      (IMU_CALC, 0x03);
+      (IMU_CALC, 0x03)
+      (GPS, 0x23);
 
   const boost::unordered_map<AsctecSerial::DataType, const std::size_t> AsctecSerial::packet_size = boost::assign::map_list_of
       (IMU_RAW, sizeof(IMU_RAWDATA))
       (STATUS, sizeof(LL_STATUS))
-      (IMU_CALC, sizeof(IMU_CALCDATA));
+      (IMU_CALC, sizeof(IMU_CALCDATA))
+      (GPS, sizeof(GPS_DATA));
 
   //example CRC16 function
   unsigned short crc_update(unsigned short crc, unsigned char data)
@@ -57,8 +63,6 @@ namespace cpr_asctec_driver
   bool AsctecSerial::sendCommand(const CTRL_INPUT &command)
   {
     std::size_t wrote = serial_.write((uint8_t *) &command, sizeof(command));
-
-    ROS_DEBUG_STREAM("Wrote command " << wrote << " of " << sizeof(command));
     return true;
   }
 
@@ -66,20 +70,14 @@ namespace cpr_asctec_driver
   {
     POLL_REQUEST request;
 
-    int i = 0;
     for (std::set<DataType>::iterator it = requests.begin(); it != requests.end(); ++it)
     {
-      i++;
       request.packets += packet_request.at(*it);
     }
 
     std::size_t wrote = serial_.write((uint8_t *) &request, sizeof(request));
-    ROS_DEBUG_STREAM("Wrote " << wrote << " expected " << sizeof(request));
-
-
     return true;
   }
-
 
   AsctecSerial::DataType AsctecSerial::poll()
   {
@@ -103,21 +101,21 @@ namespace cpr_asctec_driver
         {
           type = STATUS;
           status = *(LL_STATUS *) (response.c_str() + i);
-          ROS_DEBUG_STREAM("uptime " << status.up_time);
-          ROS_DEBUG_STREAM("running " << status.flying);
-          ROS_DEBUG_STREAM("on " << status.motors_on);
         }
         else if (header.packet_desc == packet_desc.at(IMU_CALC))
         {
           type = IMU_CALC;
-          IMU_CALCDATA imu_calc = *(IMU_CALCDATA *) (response.c_str() + i);
-          ROS_DEBUG_STREAM("imu calc " << imu_calc.acc_z);
+          imu_calc = *(IMU_CALCDATA *) (response.c_str() + i);
         }
         else if (header.packet_desc == packet_desc.at(IMU_RAW))
         {
           type = IMU_RAW;
-          IMU_RAWDATA imu_raw = *(IMU_RAWDATA *) (response.c_str() + i);
-          ROS_DEBUG_STREAM("imu raw " << imu_raw.acc_z);
+          imu_raw = *(IMU_RAWDATA *) (response.c_str() + i);
+        }
+        else if (header.packet_desc == packet_desc.at(GPS))
+        {
+          type = GPS;
+          gps = *(GPS_DATA *) (response.c_str() + i);
         }
         else
         {

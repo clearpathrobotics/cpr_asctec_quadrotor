@@ -9,8 +9,8 @@
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find cpr_asctec_viz)/rviz/four_uavs.rviz" />
 
-  <node pkg="quadrotor_path_follower" type="path_follower" name="path_follower" output="screen">
-    <rosparam file="$(find quadrotor_path_follower)/config/square_pattern.yaml" />
+  <node pkg="cpr_quadrotor_waypoint_demo" type="path_follower" name="path_follower" output="screen">
+    <rosparam file="$(find cpr_quadrotor_waypoint_demo)/config/square_pattern.yaml" />
   </node>
 
   <include file="$(find cpr_asctec_gazebo)/launch/spawn_quadrotor.launch">

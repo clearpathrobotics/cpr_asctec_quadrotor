@@ -15,7 +15,9 @@
 
   <group ns="$(arg robot_name)">
 
-    <param name="robot_description" command="$(find xacro)/xacro.py '$(find cpr_asctec_gazebo)/urdf/$(arg model).gazebo.xacro'
+    <param name="robot_description" command="$(find xacro)/xacro
+      '$(find cpr_asctec_gazebo)/urdf/$(arg model).gazebo.xacro'
+      --inorder
       material:=$(arg material)
       base_link_frame:=$(arg robot_name)/base_link
       world_frame:=world
@@ -30,7 +32,7 @@
       <arg name="controllers" value="$(arg controllers)"/>
       <arg name="model" value="$(arg model)"/>
 
-      <arg name="model_suffix" value="_sim"/>
+      <!-- <arg name="model_suffix" value="_sim"/> -->
       <arg name="state_topic" value="ground_truth/state"/>
     </include>
 

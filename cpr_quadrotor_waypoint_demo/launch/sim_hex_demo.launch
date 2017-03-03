@@ -4,7 +4,7 @@
   <!-- <arg name="model" default="hummingbird" /> -->
   <arg name="model" default="pelican" />
 
-  <param name="xacro" command="$(find xacro)/xacro.py
+  <param name="xacro" command="$(find xacro)/xacro
     '$(find cpr_asctec_gazebo)/worlds/empty.world.xacro' -o 'empty.world'
     --inorder
     real_time_update_rate:='100.0'
@@ -17,7 +17,7 @@
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find cpr_asctec_viz)/rviz/three_uavs.rviz" />
 
-  <node pkg="quadrotor_path_follower" type="path_follower" name="path_follower" output="screen">
+  <node pkg="cpr_quadrotor_waypoint_demo" type="path_follower" name="path_follower" output="screen">
     <rosparam file="$(find cpr_quadrotor_waypoint_demo)/config/hex_pattern.yaml" />
   </node>
 

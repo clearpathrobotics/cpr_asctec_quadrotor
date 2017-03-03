@@ -7,6 +7,7 @@
 
 typedef boost::chrono::steady_clock time_source;
 
+// TODO(pbovbel) fix threading or switched to CombinedRobotHW
 void controlLoop(cpr_asctec_driver::AsctecHardware &asctec_hardware,
                  controller_manager::ControllerManager &cm,
                  time_source::time_point &last_time)

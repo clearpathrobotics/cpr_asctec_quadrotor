@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="robot_name"/>
+  <arg name="robot_name" default="uav1"/>
   <arg name="port" default="/dev/ttyS3"/>
   <arg name="model" default="hummingbird" />
   <arg name="material" default="Grey" />
@@ -23,19 +23,19 @@
       <arg name="robot_name" value="$(arg robot_name)"/>
       <arg name="controllers" value="$(arg controllers)"/>
       <arg name="model" value="$(arg model)"/>
-      <arg name="state_topic" value="/vicon/$(arg robot_name)/$(arg robot_name)"/>
+      <arg name="state_topic" value="state"/>
 
       <arg name="local" default="$(arg local)" />
       <arg name="remote" default="$(arg remote)" />
     </include>
 
-    <node pkg="cpr_asctec_driver" type="asctec_node" name="asctec_node" output="screen" if="$(arg local)">
+    <node pkg="cpr_asctec_driver" type="cpr_asctec_node" name="cpr_asctec_node" output="screen" if="$(arg local)">
 
       <rosparam subst_value="true">
         port: $(arg port)
       </rosparam>
 
-      <remap from="state" to="/vicon/$(arg robot_name)/$(arg robot_name)"/>
+      <!-- <remap from="state" to="/vicon/$(arg robot_name)/$(arg robot_name)"/> -->
     </node>
 
   </group>

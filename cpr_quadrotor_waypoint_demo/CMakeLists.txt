@@ -5,6 +5,8 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib hector_uav_msgs roscpp geometry_msgs tf2_geometry_msgs
 )
 
+set_directory_properties(PROPERTIES COMPILE_OPTIONS "-std=c++11;")
+
 include_directories(${catkin_INCLUDE_DIRS})
 
 catkin_package(

@@ -7,13 +7,13 @@
     <!-- <arg name="control_mode" value="attitude"/> -->
   </include>
 
-  <node pkg="vicon_bridge" type="vicon_bridge" name="vicon" output="screen">
+  <!-- <node pkg="vicon_bridge" type="vicon_bridge" name="vicon" output="screen">
     <param name="stream_mode" value="ServerPush" type="str"/>
     <param name="datastream_hostport" value="VICON-NAVA01:801" type="str"/>
     <param name="tf_ref_frame_id" value="world"/>
     <param name="publish_markers" value="false"/>
     <param name="broadcast_transform" value="false"/>
-  </node>
+  </node> -->
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find cpr_asctec_viz)/rviz/teleop.rviz" />
 

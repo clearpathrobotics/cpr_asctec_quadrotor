@@ -12,20 +12,31 @@
 #include <hector_uav_msgs/MotorStatus.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/MagneticField.h>
+#include <sensor_msgs/NavSatFix.h>
 #include <std_msgs/Bool.h>
 
 #include <ros/ros.h>
 #include <boost/thread/mutex.hpp>
 
+#include <cstdint>
+
 namespace cpr_asctec_driver
 {
+
+  // cribbed from https://github.com/ccny-ros-pkg/asctec_drivers/blob/master/asctec_proc/include/asctec_proc/asctec_proc.h
+  const double ASC_TO_ROS_ANGLE  = (1.0 /  1000.0) * 3.14159265 / 180.0; // converts to rad
+  const double ASC_TO_ROS_ANGVEL = (1.0 /    64.8) * 3.14159265 / 180.0; // convetts to rad/s
+  const double ASC_TO_ROS_ACC    = (1.0 / 10000.0) * 9.81;               // converts to m/s^s
+  const double ASC_TO_ROS_HEIGHT = (1.0 /  1000.0);                      // converts to m
+
+  const double ASC_TO_ROS_LAT_LONG = 1.0 / 10000000.0;
+  const uint8_t ASC_GPS_FIX = 0x03;
 
   class AsctecHardware : public hardware_interface::RobotHW
   {
   public:
     AsctecHardware(ros::NodeHandle nh, ros::NodeHandle private_nh);
-
-    virtual ~AsctecHardware();
 
     void requestData();
 
@@ -53,7 +64,10 @@ namespace cpr_asctec_driver
     geometry_msgs::Pose pose_;
     geometry_msgs::Twist twist_;
     geometry_msgs::Accel acceleration_;
+    // TODO(pbovbel) initialize frame ids:
     sensor_msgs::Imu imu_;
+    sensor_msgs::MagneticField mag_;
+    sensor_msgs::NavSatFix gps_fix_;
     hector_uav_msgs::MotorStatus motor_status_;
 
     boost::shared_ptr<hector_quadrotor_interface::AttitudeSubscriberHelper> attitude_subscriber_helper_;
@@ -83,7 +97,7 @@ namespace cpr_asctec_driver
 
     boost::shared_ptr<hector_quadrotor_interface::StateSubscriberHelper> state_sub_helper_;
 
-    ros::Publisher motor_status_pub_;
+    ros::Publisher motor_status_pub_, imu_pub_, mag_pub_, gps_fix_pub_;
     ros::ServiceServer motor_status_srv_;
 
   };

@@ -300,7 +300,12 @@ public:
 
   enum DataType
   {
-    NONE, STATUS, IMU_RAW, IMU_CALC, UNKNOWN
+    NONE,
+    STATUS,
+    IMU_RAW,
+    IMU_CALC,
+    GPS,
+    UNKNOWN
   };
 
   AsctecSerial(std::string port, unsigned int baud);
@@ -312,6 +317,9 @@ public:
   DataType poll();
 
   LL_STATUS status;
+  IMU_CALCDATA imu_calc;
+  IMU_RAWDATA imu_raw;
+  GPS_DATA gps;
 
 private:
 
